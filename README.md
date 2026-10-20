@@ -42,11 +42,43 @@ To try it on a computer first, open `index.html` in Chrome. Spotify login only w
 
 On VIDAA the browser remote moves a pointer: point at a tile and press OK.
 
-## Apps
+## Apps and streaming services
 
-Each tile opens the service's website (YouTube's TV site, Netflix, Prime Video, Showmax, Spotify, YouTube Music). Edit the `APPS` list in `index.html` to change the tiles or their links. The first five appear on the Home tab.
+The launcher doesn't play video itself. Each tile opens the service's website in the TV's browser, and you watch there.
 
-Only services with a public API can show live data. Spotify can; Netflix, YouTube, Prime Video and Showmax can't, so their preview panels show sample titles. A web page also can't open the TV's installed apps. If a site won't play video in your TV's browser, use that service's own TV app.
+| App | Tile opens | Live data in the preview panel |
+| --- | --- | --- |
+| YouTube | `youtube.com/tv`, the TV-sized site | No (sample title) |
+| Netflix | `netflix.com` | No (sample title) |
+| Prime Video | `primevideo.com` | No (sample title) |
+| Showmax | `showmax.com` | No (sample title) |
+| Spotify | `open.spotify.com` | Yes, with a login (see below) |
+| YouTube Music | `music.youtube.com` | No |
+| Weather | A forecast site | Yes, free (Open-Meteo) |
+
+### Using Netflix and the other video apps
+
+1. Press OK on the tile. The service's website opens.
+2. Sign in the first time. The TV browser remembers you after that.
+3. Pick something and play it.
+4. Press Back, or open your bookmark, to return to the launcher.
+
+Things to know:
+
+- **Video may not play in the TV browser.** Netflix, Prime Video and Showmax use protected video, and many TV browsers are too old or restricted to play it. If it doesn't play, use that service's own app from the TV's normal home screen. The launcher can't start those apps.
+- **Preview panels show sample titles** for Netflix, YouTube, Prime Video and Showmax. These services don't let outside apps read your watch history, so no "continue watching" data can be shown. Edit the `RECENT` list in `index.html` if you want your own text.
+- **Only Spotify and the weather can show live data**, because only they offer a public API.
+- **You need your own accounts.** Netflix, Prime Video and Showmax need a subscription, and the launcher doesn't give access to any paid content.
+
+### Adding or changing an app
+
+Edit the `APPS` list near the top of the script in `index.html`. Each entry is a name, a link and a logo:
+
+```javascript
+{ name: "Netflix", url: "https://www.netflix.com", icon: "film", g: "linear-gradient(145deg,#1f1f1f,#050505)", img: "logos/clean/netflix.png" },
+```
+
+The first five apps appear on the Home tab and the rest on the Apps tab. Any website works, so you can add Twitch, a news site or your own dashboard.
 
 ## Spotify
 
@@ -59,7 +91,57 @@ It uses the PKCE login flow, so no secret is stored. Spotify requires Premium fo
 
 ## Smart home
 
-The Smart Home tab runs in demo mode by default. To control real devices, set up [Home Assistant](https://www.home-assistant.io/), create a long-lived access token and fill in the `homeAssistant` block in `config.js`. Serve the page from the same network as Home Assistant, for example from its `config/www` folder. Never publish a copy that contains your token.
+The Smart Home tab shows tiles for lights, a fan, an AC, a door lock, a gate, curtains and cameras, plus **All Off**, **Movie Mode** and **Good Night** scenes. By default it's a **demo**: the tiles switch on screen but control nothing, and the tab says so.
+
+To control real devices, the launcher can talk to [Home Assistant](https://www.home-assistant.io/), a free hub that supports lights, locks, plugs, ACs and covers from many brands. It's the only smart-home system supported so far.
+
+You'll need:
+
+- A Home Assistant installation on your home network
+- Your devices added to Home Assistant
+- A **long-lived access token**: in Home Assistant, open your profile, then Security, then Long-lived access tokens, then Create token
+
+Then fill in the `homeAssistant` block in `config.js`:
+
+```javascript
+homeAssistant: {
+  url: "http://homeassistant.local:8123",
+  token: "your long-lived access token",
+  entities: {
+    lr: "light.living_room",   // Ceiling Lights
+    bl: "light.bedside",       // Bedside Lamps
+    fan: "fan.ceiling_fan",
+    ac: "climate.bedroom",
+    door: "lock.front_door",
+    gate: "cover.main_gate",
+    cur: "cover.living_room_curtains",
+    cam: "switch.cameras"
+  }
+}
+```
+
+The names on the right are your devices' entity IDs, which you can find in Home Assistant under Settings, then Devices and entities. Leave out any you don't have.
+
+Important:
+
+- **Never publish a copy that contains your token.** Anyone who has it can control your home. Keep the filled-in version on your own network only, for example in Home Assistant's `config/www` folder, and open it at `http://homeassistant.local:8123/local/...`.
+- **A page hosted on https can't reach an http Home Assistant.** Browsers block that, so a Netlify copy can't control devices on your home network. Serve the page from Home Assistant instead.
+- The tiles update from Home Assistant every 20 seconds.
+
+### Ask Claude to set it up for you
+
+You don't need to write this yourself. Open Claude, attach this project's `index.html` and `config.js`, and ask something like:
+
+> I use [Home Assistant / Tuya / Google Home / SmartThings / a brand app]. Help me connect my [lights, AC, door lock] to this launcher's Smart Home tab. Walk me through it one step at a time.
+
+Claude can:
+
+- Explain how to set up Home Assistant and find your entity IDs
+- Fill in the `homeAssistant` block for you from a list of your devices
+- Rename, add or remove tiles in the `DEVICES` list in `index.html`
+- Add support for another system with an API, such as Philips Hue or a Tuya hub. That takes custom code, so ask Claude to write it and test it on your own devices.
+
+If you use a different smart-home app today, tell Claude which one, since some can be added to Home Assistant first.
 
 ## Compatibility
 
