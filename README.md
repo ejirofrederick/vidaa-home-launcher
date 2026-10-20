@@ -2,7 +2,7 @@
 
 An Apple TV-style home screen for Hisense VIDAA TVs, and any smart TV with a web browser. It's one HTML page: no framework, no build step, no app store.
 
-![Clock screen and home screen](docs/screenshot.png)
+![Clock screen and home screen](screenshot.png)
 
 ## Features
 
@@ -23,7 +23,7 @@ VIDAA is Hisense's own operating system. It doesn't let you replace the home scr
 ## Quick start
 
 1. Download this repository and unzip it.
-2. Add your app logos to `logos/clean/` (see `logos/README.md`). The tiles work without them.
+2. Add your app logos to `logos/clean/` (see `LOGOS.md`). The tiles work without them.
 3. Edit `config.js`: your TV's name, your name and your city.
 4. Host the folder. The easiest free option is to drag it onto [app.netlify.com/drop](https://app.netlify.com/drop). You get an address like `https://your-site.netlify.app`.
 5. Open that address in your TV's browser and bookmark it.
